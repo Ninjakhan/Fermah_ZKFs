@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Fermah | Universal Proof Market Client</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,monospace;
+  background:#020617;
+  color:#e5e7eb;
+}
+header,footer{
+  padding:24px;
+  border-bottom:1px solid #1e293b;
+}
+footer{border-top:1px solid #1e293b;border-bottom:none}
+h1{margin:0;font-size:26px}
+p{color:#9ca3af}
+main{
+  padding:24px;
+  max-width:1000px;
+  margin:auto;
+}
+.card{
+  background:#020617;
+  border:1px solid #1e293b;
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:18px;
+}
+label{display:block;margin-top:10px;font-size:13px;color:#9ca3af}
+input,select{
+  width:100%;
+  margin-top:6px;
+  padding:8px;
+  border-radius:8px;
+  background:#000;
+  color:#e5e7eb;
+  border:1px solid #1e293b;
+}
+button{
+  margin-top:14px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#022c22;
+  font-weight:600;
+  cursor:pointer;
+}
+pre{
+  background:#000;
+  border:1px solid #1e293b;
+  border-radius:10px;
+  padding:12px;
+  font-size:12px;
+  overflow:auto;
+}
+.small{font-size:12px;color:#9ca3af}
+.ok{color:#22c55e}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Fermah — Universal Proof Market Client</h1>
+  <p>
+    Fermah is a universal proof market that matches ZK proving demand with global compute
+    to make proofs cheaper, faster, and scalable.
+  </p>
+</header>
+
+<main>
+
+<!-- WALLET -->
+<div class="card">
+<h3>0. Wallet (Identity)</h3>
+<button onclick="connectWallet()">Connect Wallet</button>
+<pre id="walletBox">Not connected</pre>
+</div>
+
+<!-- JOB CONFIG -->
+<div class="card">
+<h3>1. Proving Job Configuration</h3>
+
+<label>Proof System</label>
+<select id="system">
+  <option>zkVM</option>
+  <option>Circom</option>
+  <option>Noir</option>
+  <option>Custom</option>
+</select>
+
+<label>Approx. Constraints / Steps</label>
+<input id="constraints" type="number" placeholder="e.g. 1200000" />
+
+<label>Parallelism Preference</label>
+<select id="parallel">
+  <option>Low</option>
+  <option>Medium</option>
+  <option>High</option>
+</select>
+
+<label>Latency Preference</label>
+<select id="latency">
+  <option>Low latency</option>
+  <option>Balanced</option>
+  <option>Low cost</option>
+</select>
+
+<button onclick="estimate()">Estimate Proof Job</button>
+</div>
+
+<!-- ESTIMATION -->
+<div class="card">
+<h3>2. Proof Market Estimation</h3>
+<pre id="estimateBox">Waiting for input…</pre>
+</div>
+
+<!-- MATCHMAKER -->
+<div class="card">
+<h3>3. Matchmaker Simulation</h3>
+<button onclick="match()">Simulate Fermah Matchmaker</button>
+<pre id="matchBox"></pre>
+</div>
+
+<!-- SUPPLY SIDE -->
+<div class="card">
+<h3>4. Supply-Side Interest (Operators)</h3>
+<label>Available Hardware</label>
+<select id="hardware">
+  <option>CPU</option>
+  <option>GPU</option>
+</select>
+
+<button onclick="supply()">Register Interest</button>
+<pre id="supplyBox"></pre>
+</div>
+
+<!-- EXPORT -->
+<div class="card">
+<h3>5. Fermah-Ready Job Export</h3>
+<button onclick="exportJob()">Export Job Config</button>
+<pre id="exportBox"></pre>
+</div>
+
+<!-- HISTORY -->
+<div class="card">
+<h3>6. Job History (Local)</h3>
+<button onclick="loadHistory()">Load History</button>
+<pre id="historyBox"></pre>
+</div>
+
+<!-- TESTNET -->
+<div class="card">
+<h3>7. Join Fermah Testnet</h3>
+<p class="small">
+Public testnet onboarding is live.  
+Use this job config while joining for meaningful early access.
+</p>
+
+<a href="https://www.fermah.xyz/" target="_blank">
+  <button>Join Testnet</button>
+</a>
+</div>
+
+</main>
+
+<footer>
+<p class="small">
+Built by <strong>Mobin Ansari</strong>
+</p>
+<p class="small">
+X (Twitter): 
+<a href="https://x.com/CryptoMobin11" target="_blank" style="color:#22c55e">
+@YOUR_X_HANDLE
+</a>
+</p>
+<p class="small">
+This is a Fermah-aligned client dApp.  
+No proving is performed here.
+</p>
+</footer>
+
+<script>
+let WALLET = null
+
+function connectWallet(){
+  WALLET = "0x" + Math.random().toString(16).slice(2,42)
+  document.getElementById("walletBox").textContent = "Connected: " + WALLET
+}
+
+function estimate(){
+  const c = Number(document.getElementById("constraints").value || 0)
+  const parallel = document.getElementById("parallel").value
+
+  let compute = c * 0.000002
+  if(parallel==="High") compute *= 0.7
+  if(parallel==="Low") compute *= 1.2
+
+  const time = Math.max(1,(compute*10).toFixed(1))
+  const cost = (compute*0.15).toFixed(2)
+
+  document.getElementById("estimateBox").textContent =
+`Estimated Compute Units: ${compute.toFixed(2)}
+Estimated Time: ${time} min
+Estimated Cost Range: $${cost} – $${(cost*1.4).toFixed(2)}`
+}
+
+function match(){
+  document.getElementById("matchBox").textContent =
+`Matchmaker Result:
+• Selected GPU cluster
+• High parallelism lane
+• Optimized for throughput`
+}
+
+function supply(){
+  const hw = document.getElementById("hardware").value
+  document.getElementById("supplyBox").textContent =
+`Supply interest registered:
+Hardware: ${hw}`
+}
+
+function exportJob(){
+  const job = {
+    wallet: WALLET,
+    job_type:"zk_proof",
+    proof_system:document.getElementById("system").value,
+    constraints:Number(document.getElementById("constraints").value),
+    parallelism:document.getElementById("parallel").value,
+    latency_pref:document.getElementById("latency").value,
+    created_at:new Date().toISOString()
+  }
+
+  localStorage.setItem("fermah_job", JSON.stringify(job))
+  document.getElementById("exportBox").textContent =
+JSON.stringify(job,null,2)
+}
+
+function loadHistory(){
+  const h = localStorage.getItem("fermah_job")
+  document.getElementById("historyBox").textContent =
+  h ? h : "No previous jobs found"
+}
+</script>
+
+</body>
+</html>
